@@ -165,35 +165,16 @@
         else if (_score[player] == 40)
         {
             _score[player] = 0;
+            if (_scoreSet[player][_currentSet] == 6)
+            {
+                _currentSet++;
+            }
             _scoreSet[player][_currentSet]++;
             CheckGagnerSet(player);
         }
         else
         {
             _score[player] += score;
-        }
-    }
-    
-    // Méthode pour update un set 
-    public void UpdateSet(String player, int set)
-    {
-        ThrowException();
-        if (!_scoreSet.ContainsKey(player))
-        {
-            _scoreSet[player] = new int[3];
-        }
-        _scoreSet[player][_currentSet] = set;
-        if (_scoreSet[player][_currentSet] == 6)
-        {
-            _currentSet++;
-            if (_currentSet == 3)
-            {
-                TerminerMatch();
-            }
-        }
-        else
-        {
-            jeuTermine = true;
         }
     }
     
@@ -229,12 +210,17 @@
         }
     }
     
+    // TODO : Méthode CheckGagnerJeu
+    
     private void CheckGagnerSet(string player)
     {
-        if (_scoreSet[player][_currentSet] == 6)
+        if (_scoreSet[player][_currentSet] >= 6 && (_scoreSet[player][_currentSet] - _scoreSet[GetOpponent(player)][_currentSet]) >= 2)
         {
             _currentSet++;
-            if (_currentSet == 3)
+            int setsGagnesJoueurA = _scoreSet[JoueurA].Count(score => score >= 6);
+            int setsGagnesJoueurB = _scoreSet[JoueurB].Count(score => score >= 6);
+
+            if (setsGagnesJoueurA == 2 || setsGagnesJoueurB == 2)
             {
                 TerminerMatch();
             }
@@ -248,27 +234,44 @@
             jeuTermine = true;
         }
     }
+
+    private string GetOpponent(string player)
+    {
+        return player == JoueurA ? JoueurB : JoueurA;
+    }
+
     
     // Méthode pour récupérer le résultat
     public string GetResultat()
     {
+        string joueurEnTete = _scoreSet[JoueurA][_currentSet] > _scoreSet[JoueurB][_currentSet] ? JoueurA : JoueurB;
+        string joueurPerdant = joueurEnTete == JoueurA ? JoueurB : JoueurA;
+
         if (GetEtatMatch() == EtatMatch.JeuTermine)
         {
-            string joueurEnTete = _scoreSet[JoueurA][_currentSet] > _scoreSet[JoueurB][_currentSet] ? JoueurA : JoueurB;
-            return $"Le Joueur {joueurEnTete} mène {_scoreSet[JoueurA][_currentSet]} jeu à {_scoreSet[JoueurB][_currentSet]}";
+            return $"Le Joueur {joueurEnTete} mène {_scoreSet[joueurEnTete][_currentSet]} jeu à {_scoreSet[joueurPerdant][_currentSet]}";
         }
         else if (GetEtatMatch() == EtatMatch.MatchTermine)
         {
-            string joueurGagnant = _scoreSet[JoueurA][_currentSet - 1] > _scoreSet[JoueurB][_currentSet - 1] ? JoueurA : JoueurB;
-            return $"Jeu, set et match pour {joueurGagnant}";
+            string joueurGagnant = _scoreSet[JoueurA].Count(set => set >= 6) > _scoreSet[JoueurB].Count(set => set >= 6) ? JoueurA : JoueurB;
+            List<string> setResultats = new();
+            for (int i = 0; i < 2; i++)
+            {
+                setResultats.Add($"{_scoreSet[joueurGagnant][i]} jeux à {_scoreSet[joueurPerdant][i]}");
+            }
+            String setResultatsString = String.Join(", ", setResultats);
+            return $"Jeu, set et match, le Joueur {joueurGagnant} remporte le match {setResultatsString}";
         }
         else if (GetEtatMatch() == EtatMatch.SetTermine)
         {
-            string joueurEnTete = _scoreSet[JoueurA][_currentSet - 1] > _scoreSet[JoueurB][_currentSet - 1] ? JoueurA : JoueurB;
-            return $"Set pour {joueurEnTete}";
+            int setTermineIndex = _currentSet - 1;
+            joueurEnTete = _scoreSet[JoueurA][setTermineIndex] > _scoreSet[JoueurB][setTermineIndex] ? JoueurA : JoueurB;
+            joueurPerdant = joueurEnTete == JoueurA ? JoueurB : JoueurA;
+            return $"Le Joueur {joueurEnTete} remporte le set {_scoreSet[joueurEnTete][setTermineIndex]} jeux à {_scoreSet[joueurPerdant][setTermineIndex]}";
         }
         return "Le match n'est pas terminé";
     }
+
 }
 
 public class PlayerScore

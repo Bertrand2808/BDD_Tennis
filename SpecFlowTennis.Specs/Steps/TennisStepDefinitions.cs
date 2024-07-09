@@ -86,6 +86,20 @@ public sealed class TennisStepDefinitions
         Assert.Equal(expectedState, _tennis.GetEtatMatch());
     }
 
+    [Then("Le set devrait être \"(.*)\"")]
+    public void ThenLeSetDevraitEtreTermine(String etat)
+    {
+        var expectedState = (Tennis.EtatMatch)Enum.Parse(typeof(Tennis.EtatMatch), etat);
+        Assert.Equal(expectedState, _tennis.GetEtatMatch());
+    }
+    
+    [Then(@"Le match devrait être ""(.*)""")]
+    public void ThenLeMatchDevraitEtre(String etat)
+    {
+        var expectedState = (Tennis.EtatMatch)Enum.Parse(typeof(Tennis.EtatMatch), etat);
+        Assert.Equal(expectedState, _tennis.GetEtatMatch());
+    }
+
     [Given("Le score est de :")]
     public void GivenLeScoreEstDe(Table table)
     {
