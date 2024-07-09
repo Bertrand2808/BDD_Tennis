@@ -1,6 +1,6 @@
 using System;
 
-namespace SpecFlowTennis.Drivers
+namespace SpecFlowTennis.Specs.Drivers
 {
     public class Driver
     {

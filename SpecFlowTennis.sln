@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpecFlowTennis", "SpecFlowTennis\SpecFlowTennis.csproj", "{A49B1236-F08E-4813-A16C-082E42CB5F98}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpecFlowTennis.Specs", "SpecFlowTennis.Specs\SpecFlowTennis.Specs.csproj", "{A49B1236-F08E-4813-A16C-082E42CB5F98}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpecFlowTennis", "SpecFlowTennis\SpecFlowTennis.csproj", "{21322942-9218-44CC-B0AA-479A3BDE7CD1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -12,5 +14,9 @@ Global
 		{A49B1236-F08E-4813-A16C-082E42CB5F98}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A49B1236-F08E-4813-A16C-082E42CB5F98}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A49B1236-F08E-4813-A16C-082E42CB5F98}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21322942-9218-44CC-B0AA-479A3BDE7CD1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21322942-9218-44CC-B0AA-479A3BDE7CD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21322942-9218-44CC-B0AA-479A3BDE7CD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21322942-9218-44CC-B0AA-479A3BDE7CD1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
