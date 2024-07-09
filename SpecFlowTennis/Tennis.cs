@@ -22,22 +22,10 @@
     // Méthode pour avoir l'état du jeu 
     public EtatMatch GetEtatMatch()
     {
-        if (matchTermine)
-        {
-            return EtatMatch.MatchTermine;
-        }
-        if (jeuTermine)
-        {
-            return EtatMatch.JeuTermine;
-        }
-        if (setTermine)
-        {
-            return EtatMatch.SetTermine;
-        }
-        if (echangeTermine)
-        {
-            return EtatMatch.EchangeTermine;
-        }
+        if (matchTermine) return EtatMatch.MatchTermine;
+        if (jeuTermine) return EtatMatch.JeuTermine;
+        if (setTermine) return EtatMatch.SetTermine;
+        if (echangeTermine) return EtatMatch.EchangeTermine;
         return EtatMatch.EnCours;
     }
     
@@ -173,6 +161,12 @@
         if (_score[player] == 30)
         {
             _score[player] = 40;
+        } 
+        else if (_score[player] == 40)
+        {
+            _score[player] = 0;
+            _scoreSet[player][_currentSet]++;
+            CheckGagnerSet(player);
         }
         else
         {
@@ -189,6 +183,18 @@
             _scoreSet[player] = new int[3];
         }
         _scoreSet[player][_currentSet] = set;
+        if (_scoreSet[player][_currentSet] == 6)
+        {
+            _currentSet++;
+            if (_currentSet == 3)
+            {
+                TerminerMatch();
+            }
+        }
+        else
+        {
+            jeuTermine = true;
+        }
     }
     
     // Méthode pour récupérer le score 
@@ -205,7 +211,64 @@
         }
         return result;
     }
+    // Méthode pour définir un score
+    public void SetScore(string player, int score)
+    {
+        if (_score.ContainsKey(player))
+        {
+            _score[player] = score;
+        }
+    }
+
+    // Méthode pour définir le score d'un set
+    public void SetSetScore(string player, int[] sets)
+    {
+        if (_scoreSet.ContainsKey(player))
+        {
+            _scoreSet[player] = sets;
+        }
+    }
     
+    private void CheckGagnerSet(string player)
+    {
+        if (_scoreSet[player][_currentSet] == 6)
+        {
+            _currentSet++;
+            if (_currentSet == 3)
+            {
+                TerminerMatch();
+            }
+            else
+            {
+                setTermine = true;
+            }
+        }
+        else
+        {
+            jeuTermine = true;
+        }
+    }
+    
+    // Méthode pour récupérer le résultat
+    public string GetResultat()
+    {
+        if (GetEtatMatch() == EtatMatch.JeuTermine)
+        {
+            string joueurEnTete = _scoreSet[JoueurA][_currentSet] > _scoreSet[JoueurB][_currentSet] ? JoueurA : JoueurB;
+            return $"Le Joueur {joueurEnTete} mène {_scoreSet[JoueurA][_currentSet]} jeu à {_scoreSet[JoueurB][_currentSet]}";
+        }
+        else if (GetEtatMatch() == EtatMatch.MatchTermine)
+        {
+            string joueurGagnant = _scoreSet[JoueurA][_currentSet - 1] > _scoreSet[JoueurB][_currentSet - 1] ? JoueurA : JoueurB;
+            return $"Jeu, set et match pour {joueurGagnant}";
+        }
+        else if (GetEtatMatch() == EtatMatch.SetTermine)
+        {
+            string joueurEnTete = _scoreSet[JoueurA][_currentSet - 1] > _scoreSet[JoueurB][_currentSet - 1] ? JoueurA : JoueurB;
+            return $"Set pour {joueurEnTete}";
+        }
+        return "Le match n'est pas terminé";
+    }
 }
 
 public class PlayerScore

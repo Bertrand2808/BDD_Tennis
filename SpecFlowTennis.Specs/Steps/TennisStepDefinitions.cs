@@ -86,5 +86,30 @@ public sealed class TennisStepDefinitions
         Assert.Equal(expectedState, _tennis.GetEtatMatch());
     }
 
+    [Given("Le score est de :")]
+    public void GivenLeScoreEstDe(Table table)
+    {
+        foreach (var row in table.Rows)
+        {
+            var player = row["Joueur"];
+            var score = int.Parse(row["Score"]);
+            var sets = new int[]
+            {
+                int.Parse(row["Set 1"]),
+                int.Parse(row["Set 2"]),
+                int.Parse(row["Set 3"]),
+            };
+            _tennis.SetScore(player, score);
+            _tennis.SetSetScore(player, sets);
+        }
+    }
+    
+    [Then("le resultat devrait être \"(.*)\"")]
+    public void ThenLeResultatDevraitEtre(String resultat)
+    {
+        var actualResult = _tennis.GetResultat();
+        Assert.Equal(resultat, actualResult);
+    }
+    
     
 }

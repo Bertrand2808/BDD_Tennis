@@ -153,6 +153,101 @@ this.ScenarioInitialize(scenarioInfo);
             this.ScenarioCleanup();
         }
         
+        [Xunit.SkippableFactAttribute(DisplayName="Le joueur A remporte un jeu")]
+        [Xunit.TraitAttribute("FeatureTitle", "Tennis")]
+        [Xunit.TraitAttribute("Description", "Le joueur A remporte un jeu")]
+        public virtual void LeJoueurARemporteUnJeu()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Le joueur A remporte un jeu", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+#line 16
+this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            bool isScenarioIgnored = default(bool);
+            bool isFeatureIgnored = default(bool);
+            if ((tagsOfScenario != null))
+            {
+                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((this._featureTags != null))
+            {
+                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((isScenarioIgnored || isFeatureIgnored))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                this.ScenarioStart();
+#line 17
+    testRunner.Given("Le match commence entre A et B", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+#line hidden
+#line 18
+    testRunner.And("Le set commence", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 19
+    testRunner.And("Le jeu commence", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+                TechTalk.SpecFlow.Table table2 = new TechTalk.SpecFlow.Table(new string[] {
+                            "Joueur",
+                            "Score",
+                            "Set 1",
+                            "Set 2",
+                            "Set 3"});
+                table2.AddRow(new string[] {
+                            "A",
+                            "40",
+                            "0",
+                            "0",
+                            "0"});
+                table2.AddRow(new string[] {
+                            "B",
+                            "0",
+                            "0",
+                            "0",
+                            "0"});
+#line 20
+    testRunner.And("Le score est de :", ((string)(null)), table2, "And ");
+#line hidden
+#line 24
+    testRunner.And("Le joueur A marque un point", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 25
+    testRunner.When("L\'échange devrait être terminé", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line hidden
+#line 26
+    testRunner.Then("Le jeu devrait être \"JeuTermine\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line hidden
+                TechTalk.SpecFlow.Table table3 = new TechTalk.SpecFlow.Table(new string[] {
+                            "Joueur",
+                            "Score",
+                            "Set 1",
+                            "Set 2",
+                            "Set 3"});
+                table3.AddRow(new string[] {
+                            "A",
+                            "0",
+                            "1",
+                            "0",
+                            "0"});
+                table3.AddRow(new string[] {
+                            "B",
+                            "0",
+                            "0",
+                            "0",
+                            "0"});
+#line 27
+    testRunner.And("le score devrait être :", ((string)(null)), table3, "And ");
+#line hidden
+#line 31
+    testRunner.And("le resultat devrait être \"Le Joueur A mène 1 jeu à 0\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+            }
+            this.ScenarioCleanup();
+        }
+        
         [System.CodeDom.Compiler.GeneratedCodeAttribute("TechTalk.SpecFlow", "3.9.0.0")]
         [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
         public class FixtureData : System.IDisposable
