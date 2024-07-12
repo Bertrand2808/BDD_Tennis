@@ -1,281 +1,213 @@
-﻿public class Tennis
-{
-    public String JoueurA { get; set; }
-    public String JoueurB { get; set; }
-    private bool matchTermine;
-    private bool jeuTermine;
-    private bool setTermine;
-    private bool echangeTermine;
-    private Dictionary<String, int> _score = new();
-    private Dictionary<String, int[]> _scoreSet = new();
-    private int _currentSet = 0;
-    
-    public enum EtatMatch
-    {
-        MatchTermine,
-        JeuTermine,
-        SetTermine,
-        EchangeTermine,
-        EnCours
-    }
-    
-    // Méthode pour avoir l'état du jeu 
-    public EtatMatch GetEtatMatch()
-    {
-        if (matchTermine) return EtatMatch.MatchTermine;
-        if (jeuTermine) return EtatMatch.JeuTermine;
-        if (setTermine) return EtatMatch.SetTermine;
-        if (echangeTermine) return EtatMatch.EchangeTermine;
-        return EtatMatch.EnCours;
-    }
-    
-    public void ChangeEtatMatch(EtatMatch etat)
-    {
-        switch (etat)
-        {
-            case EtatMatch.MatchTermine:
-                TerminerMatch();
-                break;
-            case EtatMatch.JeuTermine:
-                TerminerJeu();
-                break;
-            case EtatMatch.SetTermine:
-                TerminerSet();
-                break;
-            case EtatMatch.EchangeTermine:
-                TerminerEchange();
-                break;
-            default:
-                break;
-        }
-    }
+﻿namespace SpecFlowTennis;
 
-    // Méthode pour lancer une exception suivant l'état du match
-    public void ThrowException()
-    {
-        switch (GetEtatMatch())
-        {
-            case EtatMatch.EchangeTermine:
-                throw new InvalidOperationException("L'échange est terminé");
-            case EtatMatch.SetTermine:
-                throw new InvalidOperationException("Le set est terminé");
-            case EtatMatch.JeuTermine:
-                throw new InvalidOperationException("Le jeu est terminé");
-            case EtatMatch.MatchTermine:
-                throw new InvalidOperationException("Le match est terminé");
-            default:
-                break;
-        }
-    }
+public class Tennis
+{
+    public Player PlayerA { get; set; }
+    public Player PlayerB { get; set; }
+    public EtatMatch EtatDuMatch { get; set; }
+    public EtatSet EtatDuSet { get; set; }
+    public EtatJeu EtatDuJeu { get; set; }
     
     public Tennis(string joueurA, string joueurB)
     {
-        JoueurA = joueurA;
-        JoueurB = joueurB;
-        InitScores();
+        PlayerA = new Player(joueurA);
+        PlayerB = new Player(joueurB);
+        EtatDuMatch = EtatMatch.EnCours;
+        EtatDuSet = EtatSet.EnCours;
+        EtatDuJeu = EtatJeu.EnCours;
     }
     
-    private void InitScores()
+    public void MarquerPoint(Player joueur)
     {
-        _score[JoueurA] = 0;
-        _score[JoueurB] = 0;
-        _scoreSet[JoueurA] = new int[3];
-        _scoreSet[JoueurB] = new int[3];
+        joueur.ScorePoint();
+        VerifierEtatJeu();
     }
     
-    // Méthode pour commencer le match 
-    public void CommencerMatch()
+    public EtatMatch ChangerEtatMatch(EtatMatch etatMatch)
     {
-        Console.WriteLine("Le match commence !");
-        matchTermine = false;
+        EtatDuMatch = etatMatch;
+        return EtatDuMatch;
     }
     
-    // Méthode pour commencer le jeu 
-    public void CommencerJeu()
+    public EtatSet ChangerEtatSet(EtatSet etatSet)
     {
-        Console.WriteLine("Le jeu commence !");
-        jeuTermine = false;
+        EtatDuSet = etatSet;
+        return EtatDuSet;
     }
     
-    // Méthode pour commencer le set
-    public void CommencerSet()
+    public EtatJeu ChangerEtatJeu(EtatJeu etatJeu)
     {
-        Console.WriteLine("Le set commence !");
-        setTermine = false;
+        EtatDuJeu = etatJeu;
+        return EtatDuJeu;
     }
     
-    // Méthode pour commencer l'échange 
-    public void CommencerEchange()
+    // Vérifier si un joueur a gagné le jeu (refacto)
+    public void VerifierEtatJeu()
     {
-        Console.WriteLine("L'échange commence !");
-        echangeTermine = false;
-    }
-    
-    // Méthode pour terminer le match 
-    public void TerminerMatch()
-    {
-        Console.WriteLine("Le match est terminé !");
-        matchTermine = true;
-    }
-    
-    // Méthode pour terminer le jeu 
-    public void TerminerJeu()
-    {
-        Console.WriteLine("Le jeu commence !");
-        jeuTermine = false;
-    }
-    
-    // Méthode pour terminer le set
-    public void TerminerSet()
-    {
-        Console.WriteLine("Le set commence !");
-        setTermine = false;
-    }
-    
-    // Méthode pour terminer l'échange 
-    public void TerminerEchange()
-    {
-        Console.WriteLine("L'échange commence !");
-        echangeTermine = false;
-    }
-    
-    // Initialise le dictonnaire des sets
-    public void Init(Dictionary<String, int[]>? sets)
-    {
-        if (sets != null)
+        if (PlayerA.Avantage)
         {
-            _scoreSet = sets;
-            CommencerSet();
-        }
-    }
-    
-    // Méthode pour marquer un point
-    public void marquerPoint(String player, int score)
-    {
-        ThrowException();
-        if (!_score.ContainsKey(player))
-        {
-            _score[player] = 0;
-        }
-
-        if (_score[player] == 30)
-        {
-            _score[player] = 40;
-        } 
-        else if (_score[player] == 40)
-        {
-            _score[player] = 0;
-            if (_scoreSet[player][_currentSet] == 6)
+            if(PlayerA.Score > PlayerB.Score)
             {
-                _currentSet++;
-            }
-            _scoreSet[player][_currentSet]++;
-            CheckGagnerSet(player);
-        }
-        else
-        {
-            _score[player] += score;
-        }
-    }
-    
-    // Méthode pour récupérer le score 
-    public Dictionary<String,PlayerScore> GetScore()
-    {
-        var result = new Dictionary<String,PlayerScore>();
-        foreach (var player in _score.Keys)
-        {
-            result.Add(player, new PlayerScore
-            {
-                Score = _score[player],
-                Sets = _scoreSet.ContainsKey(player) ? _scoreSet[player] : new int[3]
-            });
-        }
-        return result;
-    }
-    // Méthode pour définir un score
-    public void SetScore(string player, int score)
-    {
-        if (_score.ContainsKey(player))
-        {
-            _score[player] = score;
-        }
-    }
-
-    // Méthode pour définir le score d'un set
-    public void SetSetScore(string player, int[] sets)
-    {
-        if (_scoreSet.ContainsKey(player))
-        {
-            _scoreSet[player] = sets;
-        }
-    }
-    
-    // TODO : Méthode CheckGagnerJeu
-    
-    private void CheckGagnerSet(string player)
-    {
-        if (_scoreSet[player][_currentSet] >= 6 && (_scoreSet[player][_currentSet] - _scoreSet[GetOpponent(player)][_currentSet]) >= 2)
-        {
-            _currentSet++;
-            int setsGagnesJoueurA = _scoreSet[JoueurA].Count(score => score >= 6);
-            int setsGagnesJoueurB = _scoreSet[JoueurB].Count(score => score >= 6);
-
-            if (setsGagnesJoueurA == 2 || setsGagnesJoueurB == 2)
-            {
-                TerminerMatch();
+                GagnerJeu(PlayerA, PlayerB);
             }
             else
             {
-                setTermine = true;
+                PlayerA.Avantage = false;
+                PlayerB.Avantage = false;
+            }
+        } else if (PlayerB.Avantage)
+        {
+            if(PlayerB.Score > PlayerA.Score)
+            {
+                GagnerJeu(PlayerB, PlayerA);
+            }
+            else
+            {
+                PlayerA.Avantage = false;
+                PlayerB.Avantage = false;
+            }
+        }
+        else if (PlayerA.Score == 40 && PlayerB.Score == 40)
+        {
+
+        }
+        else if (PlayerA.Score == 40 || PlayerB.Score == 40)
+        {
+            if (PlayerA.Score == 40)
+            {
+                GagnerJeu(PlayerA, PlayerB);
+            }
+            else
+            {
+                GagnerJeu(PlayerB, PlayerA);
             }
         }
         else
         {
-            jeuTermine = true;
+            ChangerEtatJeu(EtatJeu.EnCours);
+        
         }
     }
-
-    private string GetOpponent(string player)
+    
+    private void GagnerJeu(Player gagnant, Player perdant)
     {
-        return player == JoueurA ? JoueurB : JoueurA;
+        gagnant.GagnerJeu();
+        gagnant.ResetScore();
+        perdant.ResetScore();
+        ChangerEtatJeu(EtatJeu.Terminé);
+        VerifierEtatSet(gagnant, perdant);
     }
+    
+    // Vérifier si un joueur a gagné le set (refacto)
+    public void VerifierEtatSet(Player joueur, Player adversaire)
+    {
+        if (joueur.Sets[joueur.CurrentSet] >= 6 && (joueur.Sets[joueur.CurrentSet] - adversaire.Sets[adversaire.CurrentSet]) >= 2)
+        {
+            joueur.GagnerSet();
+            if(joueur.Sets.Sum() >= 2) // Match au meilleur des 3 sets
+            {
+                ChangerEtatMatch(EtatMatch.Terminé);
+            }
+            else
+            {
+                joueur.CurrentSet += 1;
+                adversaire.CurrentSet += 1;
+                ChangerEtatSet(EtatSet.EnCours);
+            }
+        }
+        else
+        {
+            ChangerEtatSet(EtatSet.EnCours);
+        }
+    }
+    
+    /*private void VerifierEtatMatch(Player joueur, Player adversaire)
+    {
+        if (joueur.Sets.Sum() >= 2) // Match au meilleur des 3 sets
+        {
+            ChangerEtatMatch(EtatMatch.Terminé);
+        }
+        else
+        {
+            joueur.GagnerSet();
+            ChangerEtatSet(EtatSet.EnCours);
+        }
+    }*/
+
 
     
-    // Méthode pour récupérer le résultat
-    public string GetResultat()
+    public void SetScores(Dictionary<string, PlayerScore> scores)
     {
-        string joueurEnTete = _scoreSet[JoueurA][_currentSet] > _scoreSet[JoueurB][_currentSet] ? JoueurA : JoueurB;
-        string joueurPerdant = joueurEnTete == JoueurA ? JoueurB : JoueurA;
-
-        if (GetEtatMatch() == EtatMatch.JeuTermine)
+        foreach (var entry in scores)
         {
-            return $"Le Joueur {joueurEnTete} mène {_scoreSet[joueurEnTete][_currentSet]} jeu à {_scoreSet[joueurPerdant][_currentSet]}";
+            var player = entry.Key == PlayerA.Name ? PlayerA : PlayerB;
+            player.SetScore(entry.Value.Score);
+            player.SetSets(entry.Value.Sets);
         }
-        else if (GetEtatMatch() == EtatMatch.MatchTermine)
-        {
-            string joueurGagnant = _scoreSet[JoueurA].Count(set => set >= 6) > _scoreSet[JoueurB].Count(set => set >= 6) ? JoueurA : JoueurB;
-            List<string> setResultats = new();
-            for (int i = 0; i < 2; i++)
-            {
-                setResultats.Add($"{_scoreSet[joueurGagnant][i]} jeux à {_scoreSet[joueurPerdant][i]}");
-            }
-            String setResultatsString = String.Join(", ", setResultats);
-            return $"Jeu, set et match, le Joueur {joueurGagnant} remporte le match {setResultatsString}";
-        }
-        else if (GetEtatMatch() == EtatMatch.SetTermine)
-        {
-            int setTermineIndex = _currentSet - 1;
-            joueurEnTete = _scoreSet[JoueurA][setTermineIndex] > _scoreSet[JoueurB][setTermineIndex] ? JoueurA : JoueurB;
-            joueurPerdant = joueurEnTete == JoueurA ? JoueurB : JoueurA;
-            return $"Le Joueur {joueurEnTete} remporte le set {_scoreSet[joueurEnTete][setTermineIndex]} jeux à {_scoreSet[joueurPerdant][setTermineIndex]}";
-        }
-        return "Le match n'est pas terminé";
     }
+    
+    public Dictionary<string, PlayerScore> GetScores()
+    {
+        return new Dictionary<string, PlayerScore>
+        {
+            { PlayerA.Name, new PlayerScore { Score = PlayerA.Score, Sets = PlayerA.Sets } },
+            { PlayerB.Name, new PlayerScore { Score = PlayerB.Score, Sets = PlayerB.Sets } }
+        };
+    }
+
+    public string GetResultatJeu()
+    {
+        var joueurEnTete = PlayerA.Sets[PlayerA.CurrentSet] > PlayerB.Sets[PlayerB.CurrentSet] ? PlayerA.Name : PlayerB.Name;
+        var jeuxA = PlayerA.Sets[PlayerA.CurrentSet];
+        var jeuxB = PlayerB.Sets[PlayerB.CurrentSet];
+        return joueurEnTete == PlayerA.Name ? $"Le Joueur {joueurEnTete} mène {jeuxA} jeu à {jeuxB}" : $"{joueurEnTete} mène {jeuxB} jeux à {jeuxA}";
+    }
+    
+    public string GetResultatSet()
+    {
+        var joueurEnTete = PlayerA.Sets.Sum() > PlayerB.Sets.Sum() ? PlayerA.Name : PlayerB.Name;
+        var setsA = PlayerA.Sets.Sum();
+        var setsB = PlayerB.Sets.Sum();
+        return joueurEnTete == PlayerA.Name ? $"Le Joueur {joueurEnTete} remporte le set {setsA} jeux à {setsB}" : $"{joueurEnTete} remporte le set {setsB} jeux à {setsA}";
+    }
+    
+    public string GetResultatMatch()
+    {
+        var joueurEnTete = PlayerA.Sets.Sum() > PlayerB.Sets.Sum() ? PlayerA.Name : PlayerB.Name;
+        var setsA = PlayerA.Sets;
+        var setsB = PlayerB.Sets;
+
+        var resultatSets = new List<string>();
+        for (int i = 0; i < setsA.Length; i++)
+        {
+            if (setsA[i] > 0 || setsB[i] > 0)
+            {
+                resultatSets.Add($"{setsA[i]}-{setsB[i]}");
+            }
+        }
+
+        var resultatSetsStr = string.Join(", ", resultatSets);
+
+        return $"Jeu, set et match. Victoire du Joueur {joueurEnTete} : {resultatSetsStr}";
+    }
+
 
 }
 
-public class PlayerScore
+public enum EtatJeu
 {
-    public int Score { get; set; }
-    public int[] Sets { get; set; }
+    EnCours,
+    Terminé
+}
+
+public enum EtatSet
+{
+    EnCours,
+    Terminé
+}
+
+public enum EtatMatch
+{
+    EnCours,
+    Terminé
 }
