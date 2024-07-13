@@ -35,7 +35,9 @@ Scenario: Le joueur A remporte un set
     Given Le match commence entre A et B
     Then Le match devrait être EnCours
     Given Le set est EnCours
-    And Le jeu est EnCours
+    And Le set en cours est le set 1
+    Then Le set en cours devrait être le set 1
+    Given Le jeu est EnCours
     And Le score est de :
       | Joueur | Score | Set 1 | Set 2 | Set 3 |
       | A      |  40   |   5   |   0   |   0   |
@@ -47,6 +49,7 @@ Scenario: Le joueur A remporte un set
       | A      |   0   |   6   |   0   |   0   |
       | B      |   0   |   0   |   0   |   0   |
     And Le set devrait être Terminé
+    And Le set en cours devrait être le set 2
     And le resultat du set devrait être "Le Joueur A remporte le set 6 jeux à 0"
     
 Scenario: Le joueur A remporte le match 
@@ -115,3 +118,22 @@ Scenario: Il y a un tie break
   And Le jeu devrait être Terminé
   And le resultat du jeu devrait être "6-6 dans le set en cours, tie break"
   
+Scenario: Joueur A gagne au tie break
+  Given Le match commence entre A et B
+  Then Le match devrait être EnCours
+  Given Le set en cours est le set 2
+  And Le jeu est EnCours
+  And Le set est TieBreak
+  And Le score est de :
+    | Joueur | Score | Set 1 | Set 2 | Set 3 |
+    | A      |   6   |   2   |   6   |   0   |
+    | B      |   1   |   6   |   6   |   0   |
+  When Joueur A marque un point
+  Then le score devrait être : 
+    | Joueur | Score | Set 1 | Set 2 | Set 3 |
+    | A      |   0   |   2   |   7   |   0   |
+    | B      |   0   |   6   |   6   |   0   |
+  And Le jeu devrait être Terminé
+  And Le set devrait être Terminé
+  And Le set en cours devrait être le set 3
+  And le resultat du set devrait être "Le Joueur A remporte le set 7 jeux à 6"

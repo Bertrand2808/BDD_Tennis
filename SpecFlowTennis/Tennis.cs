@@ -4,9 +4,9 @@
     {
         public Player PlayerA { get; set; }
         public Player PlayerB { get; set; }
-        public EtatMatch EtatDuMatch { get; set; }
-        public EtatSet EtatDuSet { get; set; }
-        public EtatJeu EtatDuJeu { get; set; }
+        public EtatMatch EtatDuMatch { get; private set; }
+        public EtatSet EtatDuSet { get; private set; }
+        public EtatJeu EtatDuJeu { get; private set; }
 
         public Tennis(string joueurA, string joueurB)
         {
@@ -20,11 +20,18 @@
         public void MarquerPoint(Player joueur)
         {
             var adversaire = joueur == PlayerA ? PlayerB : PlayerA;
-            joueur.ScorePoint(adversaire);
+            if (EtatDuSet == EtatSet.TieBreak)
+            {
+                joueur.ScoreTieBreak(adversaire);
+            }
+            else
+            {
+                joueur.ScorePoint(adversaire);
+            }
             VerifierEtatJeu();
         }
 
-        public EtatMatch ChangerEtatMatch(EtatMatch etatMatch)
+        private EtatMatch ChangerEtatMatch(EtatMatch etatMatch)
         {
             EtatDuMatch = etatMatch;
             return EtatDuMatch;
@@ -36,42 +43,67 @@
             return EtatDuSet;
         }
 
-        public EtatJeu ChangerEtatJeu(EtatJeu etatJeu)
+        private EtatJeu ChangerEtatJeu(EtatJeu etatJeu)
         {
             EtatDuJeu = etatJeu;
             return EtatDuJeu;
         }
 
-        public void VerifierEtatJeu()
+        /* 
+         * Vérifie l'état du jeu en cours
+         * (refactorisation)
+         */
+        private void VerifierEtatJeu()
         {
-            if (PlayerA.Score == 60)
+            if (EtatDuSet == EtatSet.TieBreak)
+            {
+                VerifierEtatJeuTieBreak();
+            }
+            else
+            {
+                VerifierEtatJeuNormal();
+            }
+        }
+        
+        /* 
+         * Vérifie l'état du jeu en cours en cas de tie break (refactorisation de VerifierEtatJeu)
+         */
+        private void VerifierEtatJeuTieBreak()
+        {
+            if (PlayerA.Score >= 7 && PlayerA.Score - PlayerB.Score >= 2)
             {
                 GagnerJeu(PlayerA, PlayerB);
             }
-            else if (PlayerB.Score == 60)
+            else if (PlayerB.Score >= 7 && PlayerB.Score - PlayerA.Score >= 2)
             {
                 GagnerJeu(PlayerB, PlayerA);
             }
-            else if (PlayerA.Score == 40 && PlayerB.Score < 40)
+            else
+            {
+                ChangerEtatJeu(EtatJeu.EnCours);
+            }
+        }
+        
+        /* 
+         * Vérifie l'état du jeu en cours en dehors du tie break (refactorisation de VerifierEtatJeu)
+         */
+        private void VerifierEtatJeuNormal()
+        {
+            if (PlayerA.Score == 60 || (PlayerA.Score == 40 && PlayerB.Score < 40))
             {
                 GagnerJeu(PlayerA, PlayerB);
             }
-            else if (PlayerB.Score == 40 && PlayerA.Score < 40)
+            else if (PlayerB.Score == 60 || (PlayerB.Score == 40 && PlayerA.Score < 40))
             {
                 GagnerJeu(PlayerB, PlayerA);
             }
             else if (PlayerA.Score == 40 && PlayerB.Score == 40)
             {
-                // Both players are at deuce
                 PlayerA.Avantage = false;
                 PlayerB.Avantage = false;
                 ChangerEtatJeu(EtatJeu.EnCours);
             }
-            else if (PlayerA.Score == 50)
-            {
-                ChangerEtatJeu(EtatJeu.EnCours);
-            }
-            else if (PlayerB.Score == 50)
+            else if (PlayerA.Score == 50 || PlayerB.Score == 50)
             {
                 ChangerEtatJeu(EtatJeu.EnCours);
             }
@@ -80,43 +112,51 @@
                 ChangerEtatJeu(EtatJeu.EnCours);
             }
         }
-
+        
+        /* 
+         * Gagne le jeu pour le joueur gagnant et vérifie si le set est terminé en cas de tie break
+         */
         private void GagnerJeu(Player gagnant, Player perdant)
         {
             gagnant.GagnerJeu();
             gagnant.ResetScore();
             perdant.ResetScore();
             ChangerEtatJeu(EtatJeu.Terminé);
-            VerifierEtatSet(gagnant, perdant);
-        }
-
-        private void VerifierEtatSet(Player gagnant, Player perdant)
-        {
-            if (gagnant.Sets[gagnant.CurrentSet] == 6 && perdant.Sets[perdant.CurrentSet] == 6)
+            if (EtatDuSet == EtatSet.TieBreak)
             {
-                ChangerEtatSet(EtatSet.TieBreak);
-            }
-            else if (gagnant.Sets[gagnant.CurrentSet] >= 6 && (gagnant.Sets[gagnant.CurrentSet] - perdant.Sets[perdant.CurrentSet]) >= 2)
-            {
-                ChangerEtatSet(EtatSet.Terminé);
                 gagnant.GagnerSet();
+                ChangerEtatSet(EtatSet.Terminé);
                 if (gagnant.Sets.Sum() >= 2) // Match au meilleur des 3 sets
                 {
                     ChangerEtatMatch(EtatMatch.Terminé);
                 }
-                else
-                {
-                    gagnant.CurrentSet += 1;
-                    perdant.CurrentSet += 1;
-                    ChangerEtatSet(EtatSet.EnCours);
-                }
             }
-            else
-            {
-                ChangerEtatSet(EtatSet.EnCours);
-            }
+            VerifierEtatSet(gagnant, perdant);
         }
 
+        /* 
+         * Vérifie si le set est terminé et si le match est terminé
+         */
+        private void VerifierEtatSet(Player gagnant, Player perdant)
+        {
+            switch (gagnant.Sets[gagnant.CurrentSet])
+            {
+                case 6 when perdant.Sets[gagnant.CurrentSet] == 6:
+                    ChangerEtatSet(EtatSet.TieBreak);
+                    break;
+                case >= 6 when (gagnant.Sets[gagnant.CurrentSet] - perdant.Sets[gagnant.CurrentSet]) >= 2:
+                {
+                    gagnant.GagnerSet();
+                    ChangerEtatSet(EtatSet.Terminé);
+                    if (gagnant.Sets.Sum() >= 2) // Match au meilleur des 3 sets
+                    {
+                        ChangerEtatMatch(EtatMatch.Terminé);
+                    }
+                    break;
+                }
+            }
+        }
+        
         public void SetScores(Dictionary<string, PlayerScore> scores)
         {
             foreach (var entry in scores)
@@ -146,34 +186,33 @@
             var jeuxA = PlayerA.Sets[PlayerA.CurrentSet];
             var jeuxB = PlayerB.Sets[PlayerB.CurrentSet];
     
-            string joueurEnTete = jeuxA > jeuxB ? PlayerA.Name : PlayerB.Name;
+            var joueurEnTete = jeuxA > jeuxB ? PlayerA.Name : PlayerB.Name;
     
-            string jeuA = jeuxA == 1 ? "jeu" : "jeux";
-            string jeuB = jeuxB == 1 ? "jeu" : "jeux";
+            var jeuA = jeuxA == 1 ? "jeu" : "jeux";
+            var jeuB = jeuxB == 1 ? "jeu" : "jeux";
 
             if (jeuxA == jeuxB)
             {
-                joueurEnTete = "égalité";
                 return $"Le score est de {jeuxA} {jeuA} partout";
             }
     
-            if (joueurEnTete == PlayerA.Name)
-            {
-                return $"Le Joueur {PlayerA.Name} mène {jeuxA} {jeuA} à {jeuxB}";
-            }
-            else
-            {
-                return $"{PlayerB.Name} mène {jeuxB} {jeuB} à {jeuxA}";
-            }
+            return joueurEnTete == PlayerA.Name ? $"Le Joueur {PlayerA.Name} mène {jeuxA} {jeuA} à {jeuxB}" : $"{PlayerB.Name} mène {jeuxB} {jeuB} à {jeuxA}";
         }
 
         public string GetResultatSet()
         {
-            var joueurEnTete = PlayerA.Sets.Sum() > PlayerB.Sets.Sum() ? PlayerA.Name : PlayerB.Name;
-            var setsA = PlayerA.Sets.Sum();
-            var setsB = PlayerB.Sets.Sum();
-            return joueurEnTete == PlayerA.Name ? $"Le Joueur {joueurEnTete} remporte le set {setsA} jeux à {setsB}" : $"{joueurEnTete} remporte le set {setsB} jeux à {setsA}";
+            var currentSetIndex = PlayerA.CurrentSet - 1;
+            var jeuxA = PlayerA.Sets[currentSetIndex];
+            var jeuxB = PlayerB.Sets[currentSetIndex];
+            var joueurEnTete = jeuxA > jeuxB ? PlayerA.Name : PlayerB.Name;
+
+            return joueurEnTete == PlayerA.Name 
+                ? $"Le Joueur {PlayerA.Name} remporte le set {jeuxA} jeux à {jeuxB}" 
+                : $"Le Joueur {PlayerB.Name} remporte le set {jeuxB} jeux à {jeuxA}";
         }
+
+
+
 
         public string GetResultatMatch()
         {
@@ -182,7 +221,7 @@
             var setsB = PlayerB.Sets;
 
             var resultatSets = new List<string>();
-            for (int i = 0; i < setsA.Length; i++)
+            for (var i = 0; i < setsA.Length; i++)
             {
                 if (setsA[i] > 0 || setsB[i] > 0)
                 {

@@ -28,6 +28,14 @@ public sealed class TennisStepDefinitions
     [Given("Le set est (.*)")]
     public void GivenLeSetEst(string etatSet)
     {
+        if (etatSet == "TieBreak")
+        {
+            _tennis.ChangerEtatSet(EtatSet.TieBreak);
+        }
+        else
+        {
+            _tennis.ChangerEtatSet(EtatSet.EnCours);
+        }
         Assert.Equal(etatSet, _tennis.EtatDuSet.ToString());
     }
     
@@ -161,6 +169,12 @@ public sealed class TennisStepDefinitions
     {
         var resultatActuel = _tennis.GetResultatMatch();
         Assert.Equal(resultatAttendu, resultatActuel);
+    }
+    
+    [Then("Le set en cours devrait être le set (.*)")]
+    public void ThenLeSetEnCoursDevraitEtreLeSet(int set)
+    {
+        Assert.Equal(set - 1, _tennis.PlayerA.CurrentSet);
     }
     
     

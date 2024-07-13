@@ -44,6 +44,11 @@
             }
         }
 
+        public void ScoreTieBreak(Player adversaire)
+        {
+            Score += 1;
+        }
+
 
         public void ResetScore()
         {
