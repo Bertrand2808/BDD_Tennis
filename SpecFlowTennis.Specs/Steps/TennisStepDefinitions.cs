@@ -44,9 +44,11 @@ public sealed class TennisStepDefinitions
         foreach (var row in table.Rows)
         {
             var player = row["Joueur"];
-            var score = new PlayerScore
+            var scoreString = row["Score"];
+            var score = scoreString == "AV" ? 50 : int.Parse(scoreString);
+            var playerScore = new PlayerScore
             {
-                Score = int.Parse(row["Score"]),
+                Score = score,
                 Sets = new int[]
                 {
                     int.Parse(row["Set 1"]),
@@ -54,7 +56,7 @@ public sealed class TennisStepDefinitions
                     int.Parse(row["Set 3"]),
                 }
             };
-            scores.Add(player, score);
+            scores.Add(player, playerScore);
         }
 
         _tennis.SetScores(scores);
@@ -118,9 +120,11 @@ public sealed class TennisStepDefinitions
         foreach (var row in table.Rows)
         {
             var player = row["Joueur"];
+            var scoreString = row["Score"];
+            var score = scoreString == "AV" ? 50 : int.Parse(scoreString);
             var exprectedPoints = new PlayerScore
             {
-                Score = int.Parse(row["Score"]),
+                Score = score,
                 Sets = new int[]
                 {
                     int.Parse(row["Set 1"]),
