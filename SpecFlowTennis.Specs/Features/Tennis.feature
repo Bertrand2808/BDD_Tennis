@@ -96,3 +96,22 @@ Scenario: Le joueur B revient à 40-40 et gagne le jeu
     | A      |   0   |   5   |   0   |   0   |
     | B      |   0   |   1   |   0   |   0   |
   And le resultat du jeu devrait être "Le Joueur A mène 5 jeux à 1"
+  
+Scenario: Il y a un tie break
+  Given Le match commence entre A et B
+  Then Le match devrait être EnCours
+  Given Le set est EnCours
+  And Le set en cours est le set 2
+  And Le jeu est EnCours
+  And Le score est de :
+    | Joueur | Score | Set 1 | Set 2 | Set 3 |
+    | A      |  15   |   6   |   6   |   0   |
+    | B      |  40   |   4   |   5   |   0   |
+  When Joueur B marque un point
+  Then le score devrait être : 
+    | Joueur | Score | Set 1 | Set 2 | Set 3 |
+    | A      |   0   |   6   |   6   |   0   |
+    | B      |   0   |   4   |   6   |   0   |
+  And Le jeu devrait être Terminé
+  And le resultat du jeu devrait être "6-6 dans le set en cours, tie break"
+  

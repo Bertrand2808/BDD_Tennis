@@ -92,7 +92,11 @@
 
         private void VerifierEtatSet(Player gagnant, Player perdant)
         {
-            if (gagnant.Sets[gagnant.CurrentSet] >= 6 && (gagnant.Sets[gagnant.CurrentSet] - perdant.Sets[perdant.CurrentSet]) >= 2)
+            if (gagnant.Sets[gagnant.CurrentSet] == 6 && perdant.Sets[perdant.CurrentSet] == 6)
+            {
+                ChangerEtatSet(EtatSet.TieBreak);
+            }
+            else if (gagnant.Sets[gagnant.CurrentSet] >= 6 && (gagnant.Sets[gagnant.CurrentSet] - perdant.Sets[perdant.CurrentSet]) >= 2)
             {
                 ChangerEtatSet(EtatSet.Terminé);
                 gagnant.GagnerSet();
@@ -112,7 +116,6 @@
                 ChangerEtatSet(EtatSet.EnCours);
             }
         }
-
 
         public void SetScores(Dictionary<string, PlayerScore> scores)
         {
@@ -135,6 +138,11 @@
 
         public string GetResultatJeu()
         {
+            if (EtatDuSet == EtatSet.TieBreak)
+            {
+                return $"6-6 dans le set en cours, tie break";
+            }
+
             var jeuxA = PlayerA.Sets[PlayerA.CurrentSet];
             var jeuxB = PlayerB.Sets[PlayerB.CurrentSet];
     
@@ -158,9 +166,6 @@
                 return $"{PlayerB.Name} mène {jeuxB} {jeuB} à {jeuxA}";
             }
         }
-
-
-
 
         public string GetResultatSet()
         {
@@ -200,7 +205,8 @@
     public enum EtatSet
     {
         EnCours,
-        Terminé
+        Terminé,
+        TieBreak
     }
 
     public enum EtatMatch
